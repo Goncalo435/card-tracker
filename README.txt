@@ -11,8 +11,10 @@ PUBLISH ON GITHUB PAGES
 The app works from a secure website after its first successful load. Its files and saved shoe data stay on your device.
 
 TRACKING A ROUND
-- Select Shoe only to count a card in the shoe without placing it in a hand.
-- Select You, another seat, or Dealer before tapping a rank.
+- Choose 1–7 player seats in Table settings. You are always first, followed by the other seats and the dealer.
+- Tap a rank to add it to the active seat. Tap Stand to move to the next seat; after the last player stands, the dealer is up.
+- Finish dealer turn to clear the hands and start the next round. Every exposed card stays counted in the shoe.
+- Turn on Shoe only to count a card without adding it to a hand. The active seat's turn stays in place.
 - Clear round clears the visible hands. It keeps every exposed card counted in the shoe.
 - Undo restores the previous card-entry or round change.
 - Tap any recent card to change its rank, suit, or table position, or remove it.
@@ -21,6 +23,7 @@ TRACKING A ROUND
 PROBABILITY PRACTICE
 - Rank counts show cards seen, cards left, and each rank's next-card probability.
 - Grouped odds show Aces, 2–6, 7–9, and 10-value cards.
+- Your hand shows a prominent bust chance, each rank's next-card probability, and the next ranks that would bust that hand.
 - Player results show the next-card chances for 17–21, blackjack, bust, and 16 or lower.
 - Opening blackjack chance is shown before a player hand has been entered.
 - Dealer final outcomes are calculated from exposed cards, the remaining shoe, and the selected soft-17 rule. With one exposed card, the standard hidden hole card is included by default; the toggle can turn it off for no-hole-card tables.

@@ -49,7 +49,7 @@
               <div><p class="eyebrow">THE TABLE</p><h2 id="tableTitle">Live round</h2></div>
               <button id="clearRound" class="text-button" type="button">Clear round</button>
             </div>
-              <div id="seatPicker" class="seat-picker" aria-label="Choose where the next card belongs"></div>
+              <div id="seatPicker" class="seat-picker" aria-label="Current table seats and turn order"></div>
             <div class="table-note"><span class="live-dot"></span><span id="activeSeatLabel">Next card goes to You</span><span class="note-divider">·</span><span id="tableCardCount">0 cards in this round</span></div>
             <div class="recent-block">
               <div class="recent-heading"><span class="eyebrow">RECENT CARDS</span><span>Tap a card to edit</span></div>
@@ -78,7 +78,13 @@
             <div class="section-heading compact-heading"><div><p class="eyebrow">YOUR HAND</p><h2 id="handTitle">Next card</h2></div><span id="yourHandTotal" class="hand-total">—</span></div>
             <p id="handDescription" class="muted small-copy">Choose cards for You to start.</p>
             <div class="opening-bj"><span>Opening blackjack chance</span><strong id="openingBlackjackValue">—</strong></div>
-            <div id="playerOutcomes" class="outcome-grid"></div>
+            <div class="bust-callout"><span>Next-card bust chance</span><strong id="bustProbability">—</strong></div>
+            <div class="next-rank-heading"><span class="eyebrow">YOUR NEXT CARD</span><span class="muted tiny-label">Rank probability</span></div>
+            <div id="myNextCardOdds" class="my-next-card-odds"></div>
+            <details class="hand-outcomes-details">
+              <summary><span class="eyebrow">HAND RESULTS AFTER ONE CARD</span><span class="muted tiny-label">17–21, bust &amp; blackjack <b>＋</b></span></summary>
+              <div id="playerOutcomes" class="outcome-grid"></div>
+            </details>
             <div id="nextHandBreakdown" class="next-breakdown"></div>
           </section>
 
@@ -112,7 +118,10 @@
   <section id="entryDock" class="entry-dock" aria-label="Quick card entry">
     <div class="entry-topline">
       <div><p class="eyebrow">ADD A CARD</p><strong id="entrySeatName">You</strong></div>
-      <button id="suitToggle" class="suit-toggle" type="button" aria-pressed="false"><span class="toggle-dot"></span><span>Track suits</span></button>
+      <div class="entry-options">
+        <button id="shoeOnlyToggle" class="suit-toggle" type="button" aria-pressed="false"><span class="toggle-dot"></span><span>Shoe only</span></button>
+        <button id="suitToggle" class="suit-toggle" type="button" aria-pressed="false"><span class="toggle-dot"></span><span>Track suits</span></button>
+      </div>
     </div>
     <div id="suitPicker" class="suit-picker" hidden aria-label="Choose suit">
       <button type="button" data-suit="spades" aria-pressed="false">♠</button>
@@ -121,7 +130,7 @@
       <button type="button" data-suit="clubs" aria-pressed="false">♣</button>
     </div>
     <div id="rankPad" class="rank-pad" aria-label="Choose card rank"></div>
-    <div class="dock-foot"><span>Tap a rank to add it</span><span id="deckLimitHint">32 of each rank in the shoe</span></div>
+    <div class="dock-controls"><div class="dock-foot"><span>Tap a rank to add it</span><span id="deckLimitHint">32 of each rank in the shoe</span></div><button id="standButton" class="stand-button" type="button">Stand · next seat</button></div>
   </section>
 
   <dialog id="editDialog" class="app-dialog">
@@ -143,6 +152,9 @@
       <label class="field-label" for="cutPosition">Cut card position <span id="cutPositionValue">75%</span></label>
       <input id="cutPosition" class="range-control" type="range" min="50" max="90" step="1" value="75">
       <p class="field-help">The tracker highlights the cut card when the shoe reaches this penetration.</p>
+      <label class="field-label" for="seatCount">Player seats, including You</label>
+      <select id="seatCount" class="field-control"></select>
+      <p class="field-help">Cards go to the active seat. Stand advances to the next player, then the dealer.</p>
       <label class="check-row"><input id="hitSoft17" type="checkbox"><span><strong>Dealer hits soft 17</strong><small>Turn this on for H17 tables. Off means the dealer stands on soft 17.</small></span></label>
       <div class="dialog-actions"><button class="primary-button" value="save">Done</button></div>
     </form>

@@ -1,6 +1,6 @@
 "use strict";
 
-var CACHE_NAME = "blackjack-table-trainer-v3";
+var CACHE_NAME = "blackjack-table-trainer-v3-turns";
 var SHELL = [
   "./",
   "./index.html",
@@ -12,7 +12,7 @@ var SHELL = [
   "./icon-512.png",
   "./apple-touch-icon.png"
 ];
-var PREVIOUS_CACHES = ["bj-tracker-v2-iphone-v1"];
+var PREVIOUS_CACHES = ["bj-tracker-v2-iphone-v1", "blackjack-table-trainer-v3"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(

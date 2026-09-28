@@ -105,6 +105,7 @@
             <div class="controls-line"><span class="eyebrow">CURRENT SHOE</span><span id="shoeStarted" class="muted tiny-label"></span></div>
             <button id="undoButton" class="control-button" type="button"><span>↶</span> Undo last change</button>
             <button id="cutReachedButton" class="control-button" type="button"><span>✦</span> Mark cut card reached</button>
+            <button id="newRoundButton" class="new-shoe-button" type="button">＋ &nbsp;Set up a new round</button>
             <button id="newShoeButton" class="new-shoe-button" type="button">＋ &nbsp;Start a new shoe</button>
             <p class="control-note">Starting a new shoe saves this session on this device.</p>
           </section>
@@ -152,9 +153,6 @@
       <label class="field-label" for="cutPosition">Cut card position <span id="cutPositionValue">75%</span></label>
       <input id="cutPosition" class="range-control" type="range" min="50" max="90" step="1" value="75">
       <p class="field-help">The tracker highlights the cut card when the shoe reaches this penetration.</p>
-      <label class="field-label" for="seatCount">Player seats, including You</label>
-      <select id="seatCount" class="field-control"></select>
-      <p class="field-help">Cards go to the active seat. Stand advances to the next player, then the dealer.</p>
       <label class="check-row"><input id="hitSoft17" type="checkbox"><span><strong>Dealer hits soft 17</strong><small>Turn this on for H17 tables. Off means the dealer stands on soft 17.</small></span></label>
       <div class="dialog-actions"><button class="primary-button" value="save">Done</button></div>
     </form>
@@ -163,6 +161,18 @@
   <dialog id="sessionDialog" class="app-dialog session-dialog">
     <div id="sessionDetail"></div>
     <form method="dialog" class="dialog-actions"><button class="primary-button" value="close">Close</button></form>
+  </dialog>
+
+  <dialog id="roundDialog" class="app-dialog">
+    <form id="roundForm" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">NEXT HAND</p><h2>Set the table</h2></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></div>
+      <label class="field-label" for="roundSeatCount">Player seats at the table, including you</label>
+      <select id="roundSeatCount" class="field-control"></select>
+      <label class="field-label" for="mySeatPosition">Choose your seat position</label>
+      <select id="mySeatPosition" class="field-control"></select>
+      <p class="field-help">Cards will deal around the table automatically: one to each player, the dealer’s upcard, then one to each player again. Stand advances turns after the deal.</p>
+      <div class="dialog-actions"><button class="text-button" value="cancel">Later</button><button class="primary-button" value="start">Start round</button></div>
+    </form>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

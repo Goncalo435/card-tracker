@@ -37,6 +37,9 @@
       undoStack: [],
       selectedSeat: "you",
       seatCount: 5,
+      youPosition: 3,
+      roundPhase: "setup",
+      dealerRevealPending: false,
       stoodSeats: [],
       shoeOnlyEntry: false,
       suitTracking: false,
@@ -65,26 +68,43 @@
       fresh.shoeStarted = typeof saved.shoeStarted === "string" ? saved.shoeStarted : fresh.shoeStarted;
       fresh.currentRoundId = typeof saved.currentRoundId === "string" ? saved.currentRoundId : "round-" + fresh.shoeStarted;
       fresh.cards = Array.isArray(saved.cards) ? saved.cards.filter(validCard).map(function (card) {
-        return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, addedAt: card.addedAt || null, roundId: typeof card.roundId === "string" || card.roundId === null ? card.roundId : fresh.currentRoundId };
+        var oldPositions = { you: 1, p1: 2, p2: 3, p4: 4, p5: 5, p6: 6, p7: 7 };
+        var oldNames = { you: "You", p1: "Seat 2", p2: "Seat 3", p4: "Seat 4", p5: "Seat 5", p6: "Seat 6", p7: "Seat 7", dealer: "Dealer", shoe: "Shoe only" };
+        var oldShort = { you: "YOU", p1: "2", p2: "3", p4: "4", p5: "5", p6: "6", p7: "7", dealer: "DEALER", shoe: "SHOE" };
+        return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, seatNumber: Number.isInteger(card.seatNumber) ? card.seatNumber : (oldPositions[card.seat] || null), seatLabel: typeof card.seatLabel === "string" ? card.seatLabel : (oldNames[card.seat] || null), seatShort: typeof card.seatShort === "string" ? card.seatShort : (oldShort[card.seat] || null), addedAt: card.addedAt || null, roundId: typeof card.roundId === "string" || card.roundId === null ? card.roundId : fresh.currentRoundId };
       }) : [];
       fresh.sessions = Array.isArray(saved.sessions) ? saved.sessions.slice(-HISTORY_LIMIT) : [];
       fresh.undoStack = Array.isArray(saved.undoStack) ? saved.undoStack.slice(-UNDO_LIMIT).map(function (entry) {
-        if (Array.isArray(entry)) return { cards: entry.filter(validCard), selectedSeat: "you", stoodSeats: [], shoeOnlyEntry: false };
+        if (Array.isArray(entry)) return { cards: entry.filter(validCard), selectedSeat: "you", stoodSeats: [], shoeOnlyEntry: false, seatCount: 5, youPosition: 3, roundPhase: "turns", dealerRevealPending: false, dealerHoleHidden: true, currentRoundId: fresh.currentRoundId };
         return {
           cards: Array.isArray(entry && entry.cards) ? entry.cards.filter(validCard) : [],
           selectedSeat: entry && (PLAYER_SEATS.some(function (seat) { return seat.id === entry.selectedSeat; }) || entry.selectedSeat === "dealer") ? entry.selectedSeat : "you",
           stoodSeats: entry && Array.isArray(entry.stoodSeats) ? entry.stoodSeats.filter(function (seatId) { return PLAYER_SEATS.some(function (seat) { return seat.id === seatId; }); }) : [],
-          shoeOnlyEntry: entry && entry.shoeOnlyEntry === true
+          shoeOnlyEntry: entry && entry.shoeOnlyEntry === true,
+          seatCount: Number.isInteger(entry && entry.seatCount) ? Math.max(1, Math.min(7, entry.seatCount)) : 5,
+          youPosition: Number.isInteger(entry && entry.youPosition) ? Math.max(1, Math.min(7, entry.youPosition)) : 3,
+          roundPhase: entry && ["setup", "deal-first", "dealer-up", "deal-second", "turns"].indexOf(entry.roundPhase) >= 0 ? entry.roundPhase : "turns",
+          dealerRevealPending: entry && entry.dealerRevealPending === true,
+          dealerHoleHidden: entry ? entry.dealerHoleHidden !== false : true,
+          currentRoundId: entry && typeof entry.currentRoundId === "string" ? entry.currentRoundId : fresh.currentRoundId
         };
       }) : [];
       fresh.seatCount = Number.isInteger(saved.seatCount) ? Math.max(1, Math.min(7, saved.seatCount)) : 5;
+      var hasRoundCards = fresh.cards.some(function (card) { return card.seat !== "shoe" && card.roundId === fresh.currentRoundId; });
+      fresh.youPosition = Number.isInteger(saved.youPosition) ? Math.max(1, Math.min(fresh.seatCount, saved.youPosition)) : (hasRoundCards ? 1 : 3);
+      fresh.roundPhase = ["setup", "deal-first", "dealer-up", "deal-second", "turns"].indexOf(saved.roundPhase) >= 0 ? saved.roundPhase : (hasRoundCards ? "turns" : "setup");
+      fresh.dealerRevealPending = saved.dealerRevealPending === true;
       fresh.shoeOnlyEntry = saved.shoeOnlyEntry === true || saved.selectedSeat === "shoe";
       var savedTurn = saved.selectedSeat === "shoe" ? "you" : saved.selectedSeat;
       fresh.selectedSeat = PLAYER_SEATS.some(function (seat) { return seat.id === savedTurn; }) || savedTurn === "dealer" ? savedTurn : "you";
       fresh.stoodSeats = Array.isArray(saved.stoodSeats) ? saved.stoodSeats.filter(function (seatId) { return PLAYER_SEATS.some(function (seat) { return seat.id === seatId; }); }) : [];
-      if (fresh.selectedSeat !== "dealer" && !PLAYER_SEATS.slice(0, fresh.seatCount).some(function (seat) { return seat.id === fresh.selectedSeat; })) {
-        var firstActive = PLAYER_SEATS.slice(0, fresh.seatCount).find(function (seat) { return fresh.stoodSeats.indexOf(seat.id) < 0; });
-        fresh.selectedSeat = firstActive ? firstActive.id : "dealer";
+      var otherIds = PLAYER_SEATS.filter(function (seat) { return seat.id !== "you"; }).map(function (seat) { return seat.id; });
+      var activeIds = [];
+      var otherIndex = 0;
+      for (var position = 1; position <= fresh.seatCount; position += 1) activeIds.push(position === fresh.youPosition ? "you" : otherIds[otherIndex++]);
+      if (fresh.selectedSeat !== "dealer" && activeIds.indexOf(fresh.selectedSeat) < 0) {
+        var firstActive = activeIds.find(function (seatId) { return fresh.stoodSeats.indexOf(seatId) < 0; });
+        fresh.selectedSeat = firstActive || "dealer";
       }
       fresh.suitTracking = saved.suitTracking === true;
       fresh.selectedSuit = Object.prototype.hasOwnProperty.call(SUITS, saved.selectedSuit) ? saved.selectedSuit : "spades";
@@ -140,8 +160,12 @@
         }
       }
       fresh.cards = prepared.map(function (entry, index) {
-        return { id: id(), rank: entry.rank, suit: null, seat: activeSeats[index] || "shoe", addedAt: null, roundId: activeSeats[index] === "shoe" ? null : fresh.currentRoundId };
+        var seatId = activeSeats[index] || "shoe";
+        var location = seatId === "you" ? { name: "You · Seat " + fresh.youPosition, short: "YOU", position: fresh.youPosition } : seatId === "dealer" ? { name: "Dealer", short: "DEALER", position: null } : { name: "Shoe only", short: "SHOE", position: null };
+        return { id: id(), rank: entry.rank, suit: null, seat: seatId, seatNumber: location.position, seatLabel: location.name, seatShort: location.short, addedAt: null, roundId: seatId === "shoe" ? null : fresh.currentRoundId };
       });
+      fresh.roundPhase = fresh.cards.some(function (card) { return card.seat !== "shoe"; }) ? "turns" : "setup";
+      fresh.dealerRevealPending = false;
       if (["shoe", "player", "dealer"].indexOf(legacy.mode) >= 0) {
         fresh.selectedSeat = legacy.mode === "dealer" ? "dealer" : "you";
         fresh.shoeOnlyEntry = legacy.mode === "shoe";
@@ -160,7 +184,7 @@
 
   function copyCards(cards) {
     return cards.map(function (card) {
-      return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, addedAt: card.addedAt || null, roundId: card.roundId == null ? null : card.roundId };
+      return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, seatNumber: card.seatNumber == null ? null : card.seatNumber, seatLabel: card.seatLabel || null, seatShort: card.seatShort || null, addedAt: card.addedAt || null, roundId: card.roundId == null ? null : card.roundId };
     });
   }
 
@@ -169,7 +193,13 @@
       cards: copyCards(state.cards),
       selectedSeat: state.selectedSeat,
       stoodSeats: state.stoodSeats.slice(),
-      shoeOnlyEntry: state.shoeOnlyEntry
+      shoeOnlyEntry: state.shoeOnlyEntry,
+      seatCount: state.seatCount,
+      youPosition: state.youPosition,
+      roundPhase: state.roundPhase,
+      dealerRevealPending: state.dealerRevealPending,
+      dealerHoleHidden: state.dealerHoleHidden,
+      currentRoundId: state.currentRoundId
     });
     if (state.undoStack.length > UNDO_LIMIT) state.undoStack.shift();
   }
@@ -194,15 +224,44 @@
   }
 
   function activePlayerSeats() {
-    return PLAYER_SEATS.slice(0, state.seatCount);
+    var otherSeats = PLAYER_SEATS.filter(function (seat) { return seat.id !== "you"; });
+    var otherIndex = 0;
+    var seats = [];
+    for (var position = 1; position <= state.seatCount; position += 1) {
+      if (position === state.youPosition) {
+        seats.push({ id: "you", name: "You · Seat " + position, short: "YOU", position: position });
+      } else {
+        var other = otherSeats[otherIndex] || otherSeats[otherSeats.length - 1];
+        seats.push({ id: other.id, name: "Seat " + position, short: String(position), position: position });
+        otherIndex += 1;
+      }
+    }
+    return seats;
+  }
+
+  function activeSeat(seatId) {
+    return activePlayerSeats().find(function (seat) { return seat.id === seatId; }) || (seatId === "dealer" ? { id: "dealer", name: "Dealer", short: "DEALER", position: null } : seatById(seatId));
+  }
+
+  function firstPlayerSeat() {
+    var seats = activePlayerSeats();
+    return seats.length ? seats[0].id : "you";
+  }
+
+  function cardSeatName(card) {
+    return card.seatLabel || seatById(card.seat).name;
+  }
+
+  function cardSeatShort(card) {
+    return card.seatShort || seatById(card.seat).short;
   }
 
   function nextSeatAfterStand() {
-    if (state.selectedSeat === "dealer") return "you";
     var active = activePlayerSeats();
     var index = active.findIndex(function (seat) { return seat.id === state.selectedSeat; });
-    for (var i = index + 1; i < active.length; i += 1) {
-      if (state.stoodSeats.indexOf(active[i].id) < 0) return active[i].id;
+    for (var offset = 1; offset < active.length; offset += 1) {
+      var seat = active[(index + offset + active.length) % active.length];
+      if (seat.id !== state.selectedSeat && state.stoodSeats.indexOf(seat.id) < 0) return seat.id;
     }
     return "dealer";
   }
@@ -288,7 +347,7 @@
 
   function rankButtonMarkup(rank, counts, suitCounts) {
     var near = counts[rank] >= 28;
-    var disabled = counts[rank] >= 32;
+    var disabled = counts[rank] >= 32 || state.roundPhase === "setup";
     if (!disabled && state.suitTracking && suitCounts[state.selectedSuit][rank] >= 8) disabled = true;
     return '<button type="button" class="rank-key" data-rank="' + rank + '" data-near-limit="' + near + '"' + (disabled ? " disabled" : "") + ' aria-label="Add ' + rank + '">' + rank + '</button>';
   }
@@ -309,21 +368,57 @@
       var extra = hand.length > 5 ? '<span class="seat-empty">+' + (hand.length - 5) + "</span>" : "";
       var isStood = state.stoodSeats.indexOf(seat.id) >= 0;
       var seatClass = (seat.id === "dealer" ? " dealer-seat" : "") + (seat.id === state.selectedSeat ? " active-seat" : "") + (isStood ? " stood-seat" : "");
-      var turnLabel = seat.id === state.selectedSeat ? "TURN" : isStood ? "STAND" : hand.length + " card" + (hand.length === 1 ? "" : "s");
+      var turnLabel = hand.length + " card" + (hand.length === 1 ? "" : "s");
+      if (state.roundPhase === "deal-first" && seat.id !== "dealer") turnLabel = seat.id === state.selectedSeat ? "DEAL" : hand.length ? "DEALT" : "NEXT";
+      else if (state.roundPhase === "dealer-up" && seat.id === "dealer") turnLabel = "UPCARD";
+      else if (state.roundPhase === "deal-second" && seat.id !== "dealer") turnLabel = seat.id === state.selectedSeat ? "DEAL" : hand.length > 1 ? "DEALT" : "NEXT";
+      else if (state.roundPhase === "turns") turnLabel = seat.id === state.selectedSeat ? (seat.id === "dealer" ? (state.dealerRevealPending ? "HOLE CARD" : "TURN") : "TURN") : isStood ? "STAND" : turnLabel;
+      else if (state.roundPhase === "setup" && seat.id === "you") turnLabel = "YOU";
       return '<div class="seat-card' + seatClass + '" aria-current="' + (seat.id === state.selectedSeat ? "step" : "false") + '">' +
         '<span class="seat-top"><span>' + seat.short + '</span><span>' + turnLabel + "</span></span>" +
         '<strong>' + seat.name + "</strong>" +
         '<span class="seat-cards">' + (hand.length ? preview + extra : '<span class="seat-empty">Empty hand</span>') + "</span></div>";
     }).join("");
-    var active = seatById(state.selectedSeat);
-    $("#activeSeatLabel").textContent = state.shoeOnlyEntry ? "Shoe-only entry · turn stays with " + active.name : "Current turn: " + active.name;
-    $("#entrySeatName").textContent = active.name;
+    var activeTile = root.querySelector(".active-seat");
+    if (activeTile && root.scrollWidth > root.clientWidth) {
+      root.scrollLeft = Math.max(0, activeTile.offsetLeft - root.offsetLeft - (root.clientWidth - activeTile.offsetWidth) / 2);
+    }
+    var active = activeSeat(state.selectedSeat);
+    var statusText = "Current turn: " + active.name;
+    if (state.roundPhase === "setup") statusText = "Choose your seats to start a new round.";
+    else if (state.roundPhase === "deal-first") statusText = "First card · " + active.name;
+    else if (state.roundPhase === "dealer-up") statusText = "Dealer upcard · tap the card dealt to the dealer.";
+    else if (state.roundPhase === "deal-second") statusText = "Second card · " + active.name;
+    else if (state.selectedSeat === "dealer" && state.dealerRevealPending) statusText = "Dealer hole card · tap to reveal it.";
+    else if (state.shoeOnlyEntry) statusText = "Shoe-only entry · turn stays with " + active.name;
+    $("#activeSeatLabel").textContent = statusText;
+    $("#entrySeatName").textContent = state.roundPhase === "setup" ? "Set up a round" : (state.selectedSeat === "dealer" && state.dealerRevealPending ? "Dealer · reveal hole card" : active.name);
     var roundCount = state.cards.filter(function (card) { return card.seat !== "shoe" && card.roundId === state.currentRoundId; }).length;
     $("#tableCardCount").textContent = roundCount + " visible card" + (roundCount === 1 ? "" : "s") + " in this round";
-    var nextSeat = nextSeatAfterStand();
-    $("#standButton").textContent = state.selectedSeat === "dealer" ? "Finish dealer turn" : "Stand · " + seatById(nextSeat).name;
-    $("#standButton").disabled = state.shoeOnlyEntry;
+    var standButton = $("#standButton");
+    if (state.roundPhase === "setup") {
+      standButton.textContent = "Choose seats to start";
+      standButton.disabled = true;
+    } else if (state.roundPhase !== "turns") {
+      standButton.textContent = "Initial deal · automatic";
+      standButton.disabled = true;
+    } else if (state.selectedSeat === "dealer" && state.dealerRevealPending) {
+      standButton.textContent = "Tap a rank to reveal hole card";
+      standButton.disabled = true;
+    } else if (state.shoeOnlyEntry) {
+      standButton.textContent = "Turn shoe-only off to stand";
+      standButton.disabled = true;
+    } else if (state.selectedSeat === "dealer") {
+      standButton.textContent = "Finish dealer turn";
+      standButton.disabled = false;
+    } else {
+      standButton.textContent = "Stand · " + activeSeat(nextSeatAfterStand()).name;
+      standButton.disabled = false;
+    }
+    var shoeOnlyAllowed = state.roundPhase === "turns" && !(state.selectedSeat === "dealer" && state.dealerRevealPending);
+    $("#shoeOnlyToggle").disabled = !shoeOnlyAllowed;
     $("#shoeOnlyToggle").setAttribute("aria-pressed", String(state.shoeOnlyEntry));
+    $("#newRoundButton").hidden = state.roundPhase !== "setup";
   }
 
   function renderRecent() {
@@ -336,9 +431,8 @@
     root.innerHTML = recent.map(function (card) {
       var suit = card.suit && SUITS[card.suit] ? SUITS[card.suit] : null;
       var red = suit && suit.red ? " red" : "";
-      var seat = seatById(card.seat);
-      return '<button type="button" class="recent-card' + red + '" data-edit-card="' + card.id + '" aria-label="Edit ' + card.rank + (suit ? " " + SUITS[card.suit].label : "") + " at " + seat.name + '">' +
-        "<strong>" + card.rank + "</strong><small>" + (suit ? suit.symbol : seat.short) + "</small></button>";
+      return '<button type="button" class="recent-card' + red + '" data-edit-card="' + card.id + '" aria-label="Edit ' + card.rank + (suit ? " " + SUITS[card.suit].label : "") + " at " + cardSeatName(card) + '">' +
+        "<strong>" + card.rank + "</strong><small>" + (suit ? suit.symbol : cardSeatShort(card)) + "</small></button>";
     }).join("") + (state.cards.length > 10 ? '<span class="recent-overflow">+' + (state.cards.length - 10) + " earlier</span>" : "");
   }
 
@@ -588,7 +682,7 @@
     var dealer = dealerBuckets(cards);
     var hiddenHole = cards.length === 1 && state.dealerHoleHidden;
     var holeToggle = $("#holeCardToggle");
-    holeToggle.hidden = cards.length !== 1;
+    holeToggle.hidden = cards.length !== 1 || state.roundPhase !== "turns" || state.dealerRevealPending;
     holeToggle.setAttribute("aria-pressed", String(state.dealerHoleHidden));
     holeToggle.textContent = "Hidden hole card: " + (state.dealerHoleHidden ? "on" : "off");
     if (!cards.length) {
@@ -640,7 +734,7 @@
     renderDealerOdds();
     renderHistory();
     $("#undoButton").disabled = state.undoStack.length === 0;
-    $("#clearRound").disabled = !state.cards.some(function (card) { return card.seat !== "shoe" && card.roundId === state.currentRoundId; });
+    $("#clearRound").disabled = state.roundPhase === "setup";
   }
 
   function commit() {
@@ -649,6 +743,7 @@
   }
 
   function addCard(rank) {
+    if (state.roundPhase === "setup") return;
     var counts = countRanks();
     if (counts[rank] >= 32) {
       showToast("All 32 " + rank + "s are already accounted for. Check the recent cards.", true);
@@ -663,10 +758,72 @@
       }
     }
     rememberUndo();
-    var targetSeat = state.shoeOnlyEntry ? "shoe" : state.selectedSeat;
-    state.cards.push({ id: id(), rank: rank, suit: suit, seat: targetSeat, addedAt: new Date().toISOString(), roundId: targetSeat === "shoe" ? null : state.currentRoundId });
+    var targetSeat = state.shoeOnlyEntry && state.roundPhase === "turns" ? "shoe" : state.selectedSeat;
+    var location = targetSeat === "shoe" ? { id: "shoe", name: "Shoe only", short: "SHOE", position: null } : activeSeat(targetSeat);
+    state.cards.push({ id: id(), rank: rank, suit: suit, seat: targetSeat, seatNumber: location.position, seatLabel: location.name, seatShort: location.short, addedAt: new Date().toISOString(), roundId: targetSeat === "shoe" ? null : state.currentRoundId });
+    if (targetSeat !== "shoe") {
+      if (state.roundPhase === "deal-first") {
+        var firstIndex = activePlayerSeats().findIndex(function (seat) { return seat.id === state.selectedSeat; });
+        var playerSeats = activePlayerSeats();
+        if (firstIndex < playerSeats.length - 1) state.selectedSeat = playerSeats[firstIndex + 1].id;
+        else { state.roundPhase = "dealer-up"; state.selectedSeat = "dealer"; }
+      } else if (state.roundPhase === "dealer-up") {
+        state.roundPhase = "deal-second";
+        state.selectedSeat = firstPlayerSeat();
+        state.dealerHoleHidden = true;
+      } else if (state.roundPhase === "deal-second") {
+        var secondIndex = activePlayerSeats().findIndex(function (seat) { return seat.id === state.selectedSeat; });
+        var secondSeats = activePlayerSeats();
+        if (secondIndex < secondSeats.length - 1) state.selectedSeat = secondSeats[secondIndex + 1].id;
+        else {
+          state.roundPhase = "turns";
+          state.selectedSeat = firstPlayerSeat();
+          state.stoodSeats = [];
+          state.dealerRevealPending = true;
+        }
+      } else if (state.roundPhase === "turns" && state.selectedSeat === "dealer" && state.dealerRevealPending) {
+        state.dealerRevealPending = false;
+        state.dealerHoleHidden = false;
+      }
+    }
     commit();
     vibrate();
+  }
+
+  function showRoundSetup() {
+    var countSelect = $("#roundSeatCount");
+    countSelect.innerHTML = Array.from({ length: 7 }, function (_, index) {
+      var count = index + 1;
+      return '<option value="' + count + '">' + count + " player seat" + (count === 1 ? "" : "s") + " at the table</option>";
+    }).join("");
+    countSelect.value = String(state.seatCount);
+    updateMySeatChoices(state.youPosition);
+    if (!$("#roundDialog").open) $("#roundDialog").showModal();
+  }
+
+  function updateMySeatChoices(preferred) {
+    var count = Number($("#roundSeatCount").value || state.seatCount);
+    var selected = Math.max(1, Math.min(count, Number(preferred) || state.youPosition || 1));
+    $("#mySeatPosition").innerHTML = Array.from({ length: count }, function (_, index) {
+      var position = index + 1;
+      return '<option value="' + position + '">Seat ' + position + (position === selected ? " · You" : "") + "</option>";
+    }).join("");
+    $("#mySeatPosition").value = String(selected);
+  }
+
+  function startRound(seatCount, youPosition) {
+    rememberUndo();
+    state.seatCount = Math.max(1, Math.min(7, seatCount));
+    state.youPosition = Math.max(1, Math.min(state.seatCount, youPosition));
+    state.currentRoundId = id();
+    state.roundPhase = "deal-first";
+    state.selectedSeat = firstPlayerSeat();
+    state.stoodSeats = [];
+    state.shoeOnlyEntry = false;
+    state.dealerHoleHidden = true;
+    state.dealerRevealPending = false;
+    commit();
+    showToast("Round started. Tap each dealt card; the table will assign it in order.");
   }
 
   function editCard(cardId) {
@@ -677,7 +834,7 @@
     $("#editRank").innerHTML = RANKS.map(function (rank) { return '<option value="' + rank + '">' + rank + "</option>"; }).join("");
     $("#editRank").value = card.rank;
     var editSeats = [{ id: "shoe", name: "Shoe only" }].concat(activePlayerSeats(), [{ id: "dealer", name: "Dealer" }]);
-    if (!editSeats.some(function (seat) { return seat.id === card.seat; })) editSeats.push(seatById(card.seat));
+    if (!editSeats.some(function (seat) { return seat.id === card.seat; })) editSeats.push({ id: card.seat, name: cardSeatName(card) });
     $("#editSeat").innerHTML = editSeats.map(function (seat) { return '<option value="' + seat.id + '">' + seat.name + "</option>"; }).join("");
     $("#editSeat").value = card.seat;
     $("#editSuit").value = card.suit || "";
@@ -711,7 +868,9 @@
     rememberUndo();
     var original = state.cards[index];
     var roundId = seat === "shoe" ? null : seat === original.seat ? original.roundId : state.currentRoundId;
-    state.cards[index] = { id: original.id, rank: rank, suit: suit, seat: seat, addedAt: original.addedAt, roundId: roundId };
+    var location = seat === original.seat ? { position: original.seatNumber, name: original.seatLabel || seatById(seat).name, short: original.seatShort || seatById(seat).short } : activeSeat(seat);
+    if (seat === "shoe") location = { position: null, name: "Shoe only", short: "SHOE" };
+    state.cards[index] = { id: original.id, rank: rank, suit: suit, seat: seat, seatNumber: location.position, seatLabel: location.name, seatShort: location.short, addedAt: original.addedAt, roundId: roundId };
     editId = null;
     commit();
     showToast("Card entry updated.");
@@ -730,38 +889,48 @@
   }
 
   function clearRound() {
-    if (!state.cards.some(function (card) { return card.seat !== "shoe" && card.roundId === state.currentRoundId; })) return;
+    if (state.roundPhase === "setup") return;
     rememberUndo();
     state.cards = state.cards.map(function (card) {
-      if (card.seat !== "shoe" && card.roundId === state.currentRoundId) return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, addedAt: card.addedAt || null, roundId: null };
+      if (card.seat !== "shoe" && card.roundId === state.currentRoundId) return Object.assign({}, card, { roundId: null });
       return card;
     });
+    state.roundPhase = "setup";
     state.selectedSeat = "you";
     state.stoodSeats = [];
     state.shoeOnlyEntry = false;
+    state.dealerRevealPending = false;
+    state.dealerHoleHidden = true;
     commit();
     showToast("Hands cleared. All cards remain counted in the shoe.");
+    showRoundSetup();
   }
 
   function stand() {
-    if (state.shoeOnlyEntry) return;
+    if (state.roundPhase !== "turns" || state.shoeOnlyEntry) return;
+    if (state.selectedSeat === "dealer" && state.dealerRevealPending) return;
     rememberUndo();
     if (state.selectedSeat === "dealer") {
       state.cards = state.cards.map(function (card) {
-        if (card.seat !== "shoe" && card.roundId === state.currentRoundId) return { id: card.id, rank: card.rank, suit: card.suit || null, seat: card.seat, addedAt: card.addedAt || null, roundId: null };
+        if (card.seat !== "shoe" && card.roundId === state.currentRoundId) return Object.assign({}, card, { roundId: null });
         return card;
       });
+      state.roundPhase = "setup";
       state.selectedSeat = "you";
       state.stoodSeats = [];
       state.shoeOnlyEntry = false;
+      state.dealerRevealPending = false;
+      state.dealerHoleHidden = true;
       commit();
-      showToast("Dealer turn finished. The next round starts with You.");
+      showToast("Round finished. Set up the next table.");
+      showRoundSetup();
       return;
     }
     if (state.stoodSeats.indexOf(state.selectedSeat) < 0) state.stoodSeats.push(state.selectedSeat);
     state.selectedSeat = nextSeatAfterStand();
+    if (state.selectedSeat === "dealer") state.dealerRevealPending = true;
     commit();
-    showToast(state.selectedSeat === "dealer" ? "All players have stood. Dealer’s turn." : seatById(state.selectedSeat).name + " is up next.");
+    showToast(state.selectedSeat === "dealer" ? "All players have stood. Reveal the dealer hole card." : activeSeat(state.selectedSeat).name + " is up next.");
   }
 
   function undo() {
@@ -771,6 +940,12 @@
     state.selectedSeat = previous.selectedSeat;
     state.stoodSeats = previous.stoodSeats;
     state.shoeOnlyEntry = previous.shoeOnlyEntry;
+    state.seatCount = previous.seatCount || state.seatCount;
+    state.youPosition = previous.youPosition || state.youPosition;
+    state.roundPhase = previous.roundPhase || "turns";
+    state.dealerRevealPending = previous.dealerRevealPending === true;
+    state.dealerHoleHidden = previous.dealerHoleHidden !== false;
+    state.currentRoundId = previous.currentRoundId || state.currentRoundId;
     commit();
     showToast("Last change undone.");
   }
@@ -796,11 +971,15 @@
     state.selectedSeat = "you";
     state.stoodSeats = [];
     state.shoeOnlyEntry = false;
+    state.roundPhase = "setup";
+    state.dealerRevealPending = false;
+    state.dealerHoleHidden = true;
     state.manualCutReached = false;
     state.shoeStarted = new Date().toISOString();
     state.currentRoundId = id();
     commit();
     showToast("New 8-deck shoe started.");
+    showRoundSetup();
   }
 
   function viewSession(sessionId) {
@@ -812,7 +991,7 @@
       .map(function (seat) { return seat.name + " " + distribution[seat.id]; }).join(" · ") || "No card entries";
     var cardList = session.cards.map(function (card) {
       var suit = card.suit && SUITS[card.suit] ? SUITS[card.suit] : null;
-      return '<span class="session-card-item' + (suit && suit.red ? " red" : "") + '">' + card.rank + (suit ? suit.symbol : "") + '<small>' + seatById(card.seat).short + "</small></span>";
+      return '<span class="session-card-item' + (suit && suit.red ? " red" : "") + '">' + card.rank + (suit ? suit.symbol : "") + '<small>' + cardSeatShort(card) + "</small></span>";
     }).join("");
     $("#sessionDetail").innerHTML =
       '<div class="session-detail-top"><p class="eyebrow">SAVED SHOE</p><h2>Shoe ' + session.number + "</h2><p>" + dateLabel(session.startedAt, true) + " – " + dateLabel(session.endedAt, true) + "</p></div>" +
@@ -826,11 +1005,6 @@
     $("#cutPosition").value = String(state.cutPosition);
     $("#cutPositionValue").textContent = state.cutPosition + "%";
     $("#hitSoft17").checked = state.hitSoft17;
-    $("#seatCount").innerHTML = Array.from({ length: 7 }, function (_, index) {
-      var count = index + 1;
-      return '<option value="' + count + '">' + count + " player seat" + (count === 1 ? " (You)" : "s including You") + "</option>";
-    }).join("");
-    $("#seatCount").value = String(state.seatCount);
     $("#rulesDialog").showModal();
   }
 
@@ -863,6 +1037,7 @@
     $("#undoButton").addEventListener("click", undo);
     $("#standButton").addEventListener("click", stand);
     $("#clearRound").addEventListener("click", clearRound);
+    $("#newRoundButton").addEventListener("click", showRoundSetup);
     $("#newShoeButton").addEventListener("click", newShoe);
     $("#cutReachedButton").addEventListener("click", function () {
       state.manualCutReached = !state.manualCutReached;
@@ -877,25 +1052,20 @@
     $("#cutPosition").addEventListener("input", function () { $("#cutPositionValue").textContent = this.value + "%"; });
     $("#rulesForm").addEventListener("submit", function (event) {
       if (event.submitter && event.submitter.value === "save") {
-        var nextCount = Number($("#seatCount").value);
-        var hiddenSeats = PLAYER_SEATS.slice(nextCount).map(function (seat) { return seat.id; });
-        var occupiedHiddenSeat = state.cards.some(function (card) {
-          return card.roundId === state.currentRoundId && hiddenSeats.indexOf(card.seat) >= 0;
-        });
         state.cutPosition = Number($("#cutPosition").value);
         state.hitSoft17 = $("#hitSoft17").checked;
-        if (!occupiedHiddenSeat) {
-          state.seatCount = nextCount;
-          state.stoodSeats = state.stoodSeats.filter(function (seatId) {
-            return PLAYER_SEATS.slice(0, state.seatCount).some(function (seat) { return seat.id === seatId; });
-          });
-          if (state.selectedSeat !== "dealer" && !PLAYER_SEATS.slice(0, state.seatCount).some(function (seat) { return seat.id === state.selectedSeat; })) {
-            var nextActive = PLAYER_SEATS.slice(0, state.seatCount).find(function (seat) { return state.stoodSeats.indexOf(seat.id) < 0; });
-            state.selectedSeat = nextActive ? nextActive.id : "dealer";
-          }
-        }
         commit();
-        showToast(occupiedHiddenSeat ? "Settings saved. Clear the active round before reducing seats with cards." : "Training settings saved.");
+        showToast("Training settings saved.");
+      }
+    });
+    $("#roundSeatCount").addEventListener("change", function () {
+      updateMySeatChoices(Number($("#mySeatPosition").value));
+    });
+    $("#roundForm").addEventListener("submit", function (event) {
+      if (event.submitter && event.submitter.value === "start") {
+        event.preventDefault();
+        startRound(Number($("#roundSeatCount").value), Number($("#mySeatPosition").value));
+        if ($("#roundDialog").open) $("#roundDialog").close();
       }
     });
     $("#editForm").addEventListener("submit", function (event) {
@@ -927,6 +1097,7 @@
     bindEvents();
     renderConnection();
     render();
+    if (state.roundPhase === "setup") showRoundSetup();
     if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
       navigator.serviceWorker.register("./sw.js").then(function () {
         navigator.serviceWorker.ready.then(renderConnection);

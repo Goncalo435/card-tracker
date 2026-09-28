@@ -328,7 +328,7 @@ details[open] .summary-hint b { display: inline-block; transform: rotate(45deg);
   .hero-copy { font-size: 10px; }
   .shoe-summary { padding: 11px 13px 9px; }
   .page-grid { grid-template-columns: minmax(0,1fr) minmax(290px, .7fr); gap: 12px; }
-  .seat-picker { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); overflow: visible; }
+  .seat-picker { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); overflow: visible; }
   .seat-card { min-height: 76px; flex: auto; padding: 6px; }
   .seat-card strong { margin-top: 4px; font-size: 9px; }
   .seat-cards { margin-top: 4px; }

@@ -12,10 +12,12 @@ The app works from a secure website after its first successful load. Its files a
 
 TRACKING A ROUND
 - At the start of each round, choose 1–7 player seats (including you) and your seat position.
-- Tap each dealt rank as it is called. The app assigns the first card around the players, the dealer upcard, and then each player's second card in order.
-- After the deal, cards go to the active player's seat. Tap Stand to move to the next player; after every player stands, tap the dealer's hole-card rank to reveal it, then track dealer draws.
-- Finish dealer turn to clear the visible hands and set up the next round. Every exposed card stays counted in the shoe.
-- Turn on Shoe only during a player turn to count an extra exposed card without adding it to a hand. The active seat's turn stays in place.
+- Tap each dealt rank as it is called. The app assigns the first card around the players, the dealer’s upcard, and then each player’s second card in order.
+- After the deal, cards go to the active player hand. Tap Stand to move to that player's next hand or the next seat.
+- When the active player has a matching-rank pair, tap Split. The pair separates into two hands; enter one new card for each hand, then play the hands in order.
+- After every player hand stands, enter the dealer’s hole-card rank, track dealer draws, then tap Finish dealer turn.
+- Finishing the dealer turn clears visible hands and sets up the next round. Every exposed card stays counted in the shoe.
+- Turn on Shoe only during a player turn to count an extra exposed card without adding it to a hand. The active turn stays in place.
 - Clear round clears the visible hands and asks for the next table setup. It keeps every exposed card counted in the shoe.
 - Undo restores the previous card entry or round change.
 - Tap any recent card to change its rank, suit, or table position, or remove it.
@@ -24,9 +26,11 @@ TRACKING A ROUND
 PROBABILITY PRACTICE
 - Rank counts show cards seen, cards left, and each rank's next-card probability.
 - Grouped odds show Aces, 2–6, 7–9, and 10-value cards.
-- Your hand shows a prominent bust chance, each rank's next-card probability, and which next ranks would bust that hand.
-- Player results show the next-card chances for 17–21, blackjack, bust, and 16 or lower.
-- Opening blackjack chance is shown before a player hand has been entered.
+- Your active hand shows a prominent bust chance, each rank's next-card probability, and which next ranks would bust that hand.
+- Player results show the next-card chances for 17–21, blackjack, bust, and 16 or lower. Split hands are not treated as natural blackjacks.
+- The recommended action compares stand, hit, and eligible double-down expected returns using the current shoe composition and dealer outcome probabilities. Hit is a one-card lookahead: enter a card and the recommendation recalculates. Pair-split advice uses an eight-deck basic-strategy baseline.
+- Recommendation assumptions are configurable in Table settings: dealer hits soft 17, double after split, and dealer peek. Blackjack payout is assumed to be 3:2. The one-card lookahead is a training aid, not a full composition-dependent optimal strategy or a guarantee of winning.
+- Opening blackjack chance is shown before an unsplit player hand has been entered.
 - Dealer final outcomes are calculated from exposed cards, the remaining shoe, and the selected soft-17 rule. The hidden hole card is included in the dealer estimate until it is revealed.
 - The cut-card position can be changed in settings; the tracker can also mark it as reached.
 
@@ -36,7 +40,10 @@ OTHER DETAILS
 - On supported iPhones, card entry gives a short haptic response.
 - Shoe and session data are stored locally in this browser.
 - If the V2 app's local storage is present on the same website origin, V3 imports its card history and current hands the first time it opens.
-- Probabilities describe a random draw from the remaining shoe; they do not predict card order or recommend bets.
+- Probabilities describe random draws from the remaining shoe; they do not predict card order or recommend bet size.
+
+STRATEGY BACKGROUND
+- The pair-split baseline follows the usual eight-deck basic-strategy approach. Rule variations can change the preferred play. See https://wizardofodds.com/games/blackjack/strategy/8-decks/.
 
 FILES
 - index.html, styles.css, app.js: the app

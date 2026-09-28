@@ -1,6 +1,6 @@
 "use strict";
 
-var CACHE_NAME = "blackjack-table-trainer-v3-round-deal";
+var CACHE_NAME = "blackjack-table-trainer-v3-advice";
 var SHELL = [
   "./",
   "./index.html",
@@ -12,7 +12,7 @@ var SHELL = [
   "./icon-512.png",
   "./apple-touch-icon.png"
 ];
-var PREVIOUS_CACHES = ["bj-tracker-v2-iphone-v1", "blackjack-table-trainer-v3", "blackjack-table-trainer-v3-turns"];
+var PREVIOUS_CACHES = ["bj-tracker-v2-iphone-v1", "blackjack-table-trainer-v3", "blackjack-table-trainer-v3-turns", "blackjack-table-trainer-v3-round-deal", "blackjack-table-trainer-v3-splits"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
@@ -59,4 +59,6 @@ self.addEventListener("fetch", function (event) {
     })
   );
 });
+
+
 

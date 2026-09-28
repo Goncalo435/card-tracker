@@ -88,7 +88,12 @@ h1 em { color: var(--gold); font-weight: 400; }
 .seat-card.dealer-seat { background: rgba(6,15,13,.5); }
 .seat-card.shoe-seat { background: rgba(5,17,13,.52); }
 .seat-card strong { display: block; overflow: hidden; margin-top: 6px; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 650; }
-.seat-cards { display: flex; flex-wrap: wrap; gap: 3px; min-height: 19px; align-items: center; margin-top: 7px; }
+.seat-cards { display: flex; flex-direction: column; gap: 2px; min-height: 19px; align-items: stretch; margin-top: 7px; }
+.seat-hand { display: flex; align-items: center; gap: 2px; min-height: 24px; padding: 2px 3px; border: 1px solid transparent; border-radius: 5px; }
+.seat-hand small { color: var(--muted); font-size: 7px; font-weight: 700; }
+.seat-hand i, .seat-hand b { color: var(--muted); font-size: 8px; font-style: normal; }
+.seat-hand.selected-hand { border-color: rgba(227,187,113,.44); background: rgba(227,187,113,.1); }
+.seat-hand.hand-stood { opacity: .62; }
 .mini-card { display: inline-grid; min-width: 18px; height: 22px; place-items: center; border-radius: 4px; padding: 0 3px; color: #17342a; background: #f2eee1; font-family: Georgia, serif; font-weight: 700; font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .mini-card.red { color: #bb3f38; }
 .seat-empty { color: rgba(239,241,228,.35); font-size: 10px; }
@@ -116,6 +121,15 @@ h1 em { color: var(--gold); font-weight: 400; }
 .opening-bj { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 11px; padding: 9px 10px; border: 1px solid rgba(227,187,113,.2); border-radius: 9px; background: rgba(227,187,113,.055); }
 .opening-bj span { color: var(--muted); font-size: 9px; }
 .opening-bj strong { color: var(--gold); font-family: Georgia, serif; font-size: 14px; font-weight: 400; }
+.recommendation-card { margin: 11px 0 12px; padding: 11px; border: 1px solid rgba(117,183,145,.28); border-radius: 11px; background: linear-gradient(145deg, rgba(36,83,59,.22), rgba(12,25,20,.55)); }
+.recommendation-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.recommendation-heading .eyebrow { margin: 0; }
+.recommendation-heading strong { color: #b8e0c8; font-size: 16px; letter-spacing: .08em; }
+.recommendation-card .small-copy { margin: 6px 0 0; line-height: 1.45; }
+.action-values { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.action-value { padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 8px; font-variant-numeric: tabular-nums; }
+.action-value.best-action { border-color: rgba(117,183,145,.42); color: #c6e8d1; background: rgba(75,132,103,.12); }
+.recommendation-note { margin: 8px 0 0; color: var(--quiet); font-size: 8px; line-height: 1.35; }
 .outcome-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .outcome { min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 8px 7px 7px; background: rgba(255,255,255,.025); }
 .outcome span { display: block; overflow: hidden; color: var(--muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
@@ -210,6 +224,9 @@ details[open] .summary-hint b { display: inline-block; transform: rotate(45deg);
 .dock-controls { display: flex; align-items: center; gap: 9px; }
 .dock-controls .dock-foot { flex: 1; min-width: 0; }
 .stand-button { min-height: 36px; padding: 7px 13px; border: 1px solid rgba(227,187,113,.4); border-radius: 8px; color: #f1d49d; background: rgba(227,187,113,.12); font-size: 10px; font-weight: 700; white-space: nowrap; cursor: pointer; touch-action: manipulation; }
+.split-button { min-height: 36px; padding: 7px 10px; border: 1px solid rgba(130,183,155,.35); border-radius: 8px; color: #b9dcc8; background: rgba(75,132,103,.13); font-size: 10px; font-weight: 700; white-space: nowrap; cursor: pointer; touch-action: manipulation; }
+.split-button:hover { background: rgba(75,132,103,.23); }
+.split-button:disabled { opacity: .38; cursor: not-allowed; }
 .stand-button:hover { background: rgba(227,187,113,.2); }
 .stand-button:disabled { opacity: .4; cursor: not-allowed; }
 

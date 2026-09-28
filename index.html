@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#07100c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="BJ Tracker" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<title>Blackjack Probability Tracker V2</title>
+<style>
+  :root{
+    --bg:#07100c;
+    --panel:#0e1913;
+    --panel2:#13231b;
+    --panel3:#182a20;
+    --text:#f5f8f6;
+    --muted:#9eaaa3;
+    --border:#263a30;
+    --green:#39d17d;
+    --green2:#1fa45e;
+    --red:#ff6262;
+    --gold:#f0c65d;
+    --blue:#66a7ff;
+    --shadow:0 18px 55px rgba(0,0,0,.25);
+  }
+
+  *{box-sizing:border-box}
+  html{background:var(--bg)}
+  body{
+    margin:0;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at top right, rgba(57,209,125,.08), transparent 34%),
+      linear-gradient(180deg,#07100c,#0a1510 55%,#07100c);
+  }
+
+  button,select{font:inherit}
+  button{touch-action:manipulation;-webkit-tap-highlight-color:transparent} button, .chip{-webkit-user-select:none;user-select:none}
+  .wrap{max-width:1280px;margin:0 auto;padding:max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
+  .top{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    margin-bottom:16px;
+  }
+  h1{font-size:clamp(24px,4vw,40px);margin:0 0 5px;letter-spacing:-.02em}
+  h2{font-size:20px;margin:0 0 12px}
+  h3{font-size:15px;color:#dfe7e2;margin:16px 0 8px}
+  .sub{color:var(--muted);font-size:14px}
+  .badge{
+    border:1px solid var(--border);background:var(--panel2);
+    padding:7px 10px;border-radius:999px;color:var(--green);font-weight:800;
+    white-space:nowrap;
+  }
+
+  .layout{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:950px){.layout{grid-template-columns:1.06fr .94fr}}
+
+  .card{
+    background:rgba(14,25,19,.95);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:15px;
+    box-shadow:var(--shadow);
+  }
+
+  .stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px
+  }
+  .stat{
+    background:var(--panel2);border:1px solid var(--border);border-radius:13px;padding:11px
+  }
+  .stat .n{font-size:23px;font-weight:900;letter-spacing:-.02em}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .mode-row{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0
+  }
+  .mode{
+    background:#22342a;color:white;border:1px solid var(--border);
+    border-radius:11px;padding:10px 7px;font-weight:800;cursor:pointer
+  }
+  .mode.active{background:var(--green);color:#031008;border-color:var(--green)}
+
+  .rank-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px
+  }
+  @media(min-width:560px){.rank-grid{grid-template-columns:repeat(7,1fr)}}
+  .rank{
+    min-height:58px;border-radius:12px;border:2px solid transparent;
+    background:#f8fbf9;color:#07100c;font-weight:900;font-size:17px;cursor:pointer
+  }
+  .rank small{display:block;font-size:10px;font-weight:800;opacity:.6;margin-top:2px}
+  .rank:active{transform:scale(.98)}
+  .rank:disabled{opacity:.3;cursor:not-allowed}
+
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .action{
+    border:0;border-radius:11px;padding:10px 12px;font-weight:850;cursor:pointer
+  }
+  .secondary{background:#25382e;color:white}
+  .danger{background:var(--red);color:white}
+  .gold{background:var(--gold);color:#2b2000}
+  .green{background:var(--green);color:#031008}
+
+  .notice{
+    display:none;margin-top:12px;border:1px solid #5b4c24;background:#2c2512;
+    color:#ffe5a2;border-radius:12px;padding:10px 12px;font-size:13px
+  }
+
+  .hands{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .handbox{
+    background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:12px;min-height:122px
+  }
+  .handtitle{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px}
+  .total{font-size:24px;font-weight:900;margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .chip{background:#263a30;border-radius:9px;padding:6px 8px;font-weight:850;font-size:13px}
+  .chip.player{background:#19462f}
+  .chip.dealer{background:#263f64}
+  .empty{color:var(--muted);font-size:12px}
+
+  .outcomes{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:8px
+  }
+  @media(min-width:560px){.outcomes{grid-template-columns:repeat(4,1fr)}}
+  .out{
+    background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px
+  }
+  .out .label{font-size:11px;color:var(--muted)}
+  .out .pct{font-size:20px;font-weight:900;margin-top:2px}
+  .out.good .pct{color:var(--green)}
+  .out.bad .pct{color:var(--red)}
+
+  table{width:100%;border-collapse:collapse;margin-top:4px}
+  th,td{padding:9px 7px;border-bottom:1px solid var(--border);text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:11px;color:var(--muted);font-weight:700}
+  td{font-size:13px}
+  .bar{height:6px;background:#26372f;border-radius:99px;overflow:hidden;margin-top:4px}
+  .fill{height:100%;background:var(--green);border-radius:99px}
+
+  .history{
+    display:flex;flex-wrap:wrap;gap:6px;max-height:125px;overflow:auto;margin-top:8px
+  }
+
+  .smallprint{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}
+  .section-gap{margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Blackjack Probability Tracker <span style="color:var(--green)">V2</span></h1>
+      <div class="sub">8-deck shoe · 416 cards · live composition + current-hand outcomes</div>
+    </div>
+    <div class="badge">8 DECKS</div>
+  </div>
+
+  <div class="layout">
+    <section class="card">
+      <div class="stats">
+        <div class="stat"><div class="n" id="remainingCount">416</div><div class="l">Cards remaining</div></div>
+        <div class="stat"><div class="n" id="seenCount">0</div><div class="l">Cards seen</div></div>
+        <div class="stat"><div class="n" id="shoeUsed">0%</div><div class="l">Shoe used</div></div>
+      </div>
+
+      <h2>Fast card entry</h2>
+      <div class="sub">Choose where the next card belongs, then tap its rank.</div>
+
+      <div class="mode-row">
+        <button class="mode active" data-mode="shoe">Shoe only</button>
+        <button class="mode" data-mode="player">Player hand</button>
+        <button class="mode" data-mode="dealer">Dealer card</button>
+      </div>
+
+      <div class="rank-grid" id="rankButtons"></div>
+
+      <div class="actions">
+        <button class="action secondary" id="undoBtn">Undo last</button>
+        <button class="action secondary" id="clearRoundBtn">Clear round</button>
+        <button class="action gold" id="cutBtn">Cut card reached</button>
+        <button class="action danger" id="newShoeBtn">New Shoe</button>
+      </div>
+
+      <div class="notice" id="cutNotice">
+        Cut card reached. Finish the current round, then press <b>New Shoe</b> when the fresh 8-deck shoe is inserted.
+      </div>
+
+      <div class="hands">
+        <div class="handbox">
+          <div class="handtitle"><span>PLAYER</span><span id="playerState"></span></div>
+          <div class="total" id="playerTotal">—</div>
+          <div class="chips" id="playerCards"><span class="empty">No cards</span></div>
+        </div>
+        <div class="handbox">
+          <div class="handtitle"><span>DEALER / EXPOSED</span><span></span></div>
+          <div class="total" id="dealerTotal">—</div>
+          <div class="chips" id="dealerCards"><span class="empty">No cards</span></div>
+        </div>
+      </div>
+
+      <h3>Current shoe history</h3>
+      <div class="history" id="history"><span class="empty">No cards entered yet.</span></div>
+    </section>
+
+    <section class="card">
+      <h2>Player next-card outcomes</h2>
+      <div class="outcomes">
+        <div class="out bad"><div class="label">Bust next card</div><div class="pct" id="bustPct">—</div></div>
+        <div class="out good"><div class="label">Make 21</div><div class="pct" id="make21Pct">—</div></div>
+        <div class="out"><div class="label">Finish 17–20</div><div class="pct" id="make1720Pct">—</div></div>
+        <div class="out"><div class="label">Stay under 17</div><div class="pct" id="under17Pct">—</div></div>
+      </div>
+
+      <div class="outcomes section-gap">
+        <div class="out"><div class="label">Next card → 17</div><div class="pct" id="p17">—</div></div>
+        <div class="out"><div class="label">Next card → 18</div><div class="pct" id="p18">—</div></div>
+        <div class="out"><div class="label">Next card → 19</div><div class="pct" id="p19">—</div></div>
+        <div class="out"><div class="label">Next card → 20</div><div class="pct" id="p20">—</div></div>
+      </div>
+
+      <div class="outcomes section-gap">
+        <div class="out good"><div class="label">Opening blackjack chance</div><div class="pct" id="blackjackPct">—</div></div>
+      </div>
+
+      <h2 style="margin-top:18px">Probability of next rank</h2>
+      <table>
+        <thead><tr><th>Rank</th><th>Remaining</th><th>Probability</th></tr></thead>
+        <tbody id="probTable"></tbody>
+      </table>
+
+      <div class="smallprint">
+        Every card entered is removed from the active 416-card shoe. <b>Clear round</b> only clears the displayed player/dealer hands; it does not put those cards back into the shoe. <b>New Shoe</b> resets all 416 cards.
+        “Opening blackjack chance” shows the chance that the next two cards from the current shoe form A + 10/J/Q/K when no player cards are entered; with one player card, it shows the chance that the next card completes a two-card blackjack.
+        Standard blackjack rank values are used, with aces treated as 1 or 11 as appropriate.
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const START = {
+  "A":32,"2":32,"3":32,"4":32,"5":32,"6":32,"7":32,
+  "8":32,"9":32,"10":32,"J":32,"Q":32,"K":32
+};
+
+let remaining = {...START};
+let history = [];
+let playerHand = [];
+let dealerHand = [];
+let mode = "shoe";
+let cutReached = false;
+
+const tenRanks = new Set(["10","J","Q","K"]);
+
+function totalRemaining(){
+  return Object.values(remaining).reduce((a,b)=>a+b,0);
+}
+
+function rankNumeric(rank){
+  if(rank === "A") return 11;
+  if(tenRanks.has(rank)) return 10;
+  return Number(rank);
+}
+
+function handInfo(cards){
+  if(!cards.length) return {total:null, soft:false, bust:false, blackjack:false};
+
+  let total = 0;
+  let aces = 0;
+  for(const r of cards){
+    total += rankNumeric(r);
+    if(r === "A") aces++;
+  }
+
+  let softAces = aces;
+  while(total > 21 && softAces > 0){
+    total -= 10;
+    softAces--;
+  }
+
+  const soft = aces > 0 && softAces > 0 && total <= 21;
+  return {
+    total,
+    soft,
+    bust: total > 21,
+    blackjack: cards.length === 2 && total === 21
+  };
+}
+
+function addCard(rank){
+  if(remaining[rank] <= 0) return;
+
+  remaining[rank]--;
+  const entry = {rank, zone:mode};
+  history.push(entry);
+
+  if(mode === "player") playerHand.push(rank);
+  if(mode === "dealer") dealerHand.push(rank);
+
+  save();
+  render();
+}
+
+function undo(){
+  if(!history.length) return;
+  const last = history.pop();
+  remaining[last.rank]++;
+
+  if(last.zone === "player"){
+    for(let i=playerHand.length-1;i>=0;i--){
+      if(playerHand[i] === last.rank){ playerHand.splice(i,1); break; }
+    }
+  }
+  if(last.zone === "dealer"){
+    for(let i=dealerHand.length-1;i>=0;i--){
+      if(dealerHand[i] === last.rank){ dealerHand.splice(i,1); break; }
+    }
+  }
+  save();
+  render();
+}
+
+function clearRound(){
+  playerHand = [];
+  dealerHand = [];
+  save();
+  render();
+}
+
+function newShoe(){
+  remaining = {...START};
+  history = [];
+  playerHand = [];
+  dealerHand = [];
+  cutReached = false;
+  document.getElementById("cutNotice").style.display = "none";
+  save();
+  render();
+}
+
+function setMode(nextMode){
+  mode = nextMode;
+  document.querySelectorAll(".mode").forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode === mode);
+  });
+  save();
+}
+
+function markCut(){
+  cutReached = true;
+  document.getElementById("cutNotice").style.display = "block";
+  save();
+}
+
+function fmtPct(x){
+  return x == null ? "—" : (x*100).toFixed(2)+"%";
+}
+
+function nextCardOutcomeProbabilities(){
+  if(!playerHand.length) return null;
+  const totalCards = totalRemaining();
+  if(totalCards <= 0) return null;
+
+  const buckets = {
+    bust:0, make21:0, make1720:0, under17:0,
+    17:0,18:0,19:0,20:0
+  };
+
+  for(const [rank,count] of Object.entries(remaining)){
+    if(count <= 0) continue;
+    const p = count/totalCards;
+    const info = handInfo([...playerHand, rank]);
+
+    if(info.bust){
+      buckets.bust += p;
+      continue;
+    }
+
+    if(info.total === 21) buckets.make21 += p;
+    if(info.total >=17 && info.total <=20) buckets.make1720 += p;
+    if(info.total <17) buckets.under17 += p;
+    if(info.total >=17 && info.total <=20) buckets[info.total] += p;
+  }
+  return buckets;
+}
+
+function openingBlackjackProbability(){
+  const total = totalRemaining();
+  if(total <= 0) return null;
+
+  const aceCount = remaining["A"];
+  const tenCount = remaining["10"]+remaining["J"]+remaining["Q"]+remaining["K"];
+
+  if(playerHand.length === 0){
+    if(total < 2) return 0;
+    // A then 10-value OR 10-value then A
+    return (aceCount/total)*(tenCount/(total-1)) + (tenCount/total)*(aceCount/(total-1));
+  }
+
+  if(playerHand.length === 1){
+    if(playerHand[0] === "A") return tenCount/total;
+    if(tenRanks.has(playerHand[0])) return aceCount/total;
+    return 0;
+  }
+
+  return handInfo(playerHand).blackjack ? 1 : 0;
+}
+
+function renderButtons(){
+  const root = document.getElementById("rankButtons");
+  root.innerHTML = "";
+  for(const rank of Object.keys(START)){
+    const btn = document.createElement("button");
+    btn.className = "rank";
+    btn.disabled = remaining[rank] <= 0;
+    btn.innerHTML = `${rank}<small>${remaining[rank]} left</small>`;
+    btn.onclick = ()=>addCard(rank);
+    root.appendChild(btn);
+  }
+}
+
+function renderStats(){
+  const rem = totalRemaining();
+  const seen = 416-rem;
+  document.getElementById("remainingCount").textContent = rem;
+  document.getElementById("seenCount").textContent = seen;
+  document.getElementById("shoeUsed").textContent = (seen/416*100).toFixed(1)+"%";
+}
+
+function renderHand(cards, rootId, totalId, stateId, cls){
+  const root = document.getElementById(rootId);
+  const info = handInfo(cards);
+
+  if(!cards.length){
+    root.innerHTML = '<span class="empty">No cards</span>';
+    document.getElementById(totalId).textContent = "—";
+    if(stateId) document.getElementById(stateId).textContent = "";
+    return;
+  }
+
+  root.innerHTML = cards.map(r=>`<span class="chip ${cls}">${r}</span>`).join("");
+
+  let label = info.bust ? `BUST · ${info.total}` : `${info.total}${info.soft ? " soft" : ""}`;
+  if(info.blackjack) label = "BLACKJACK";
+  document.getElementById(totalId).textContent = label;
+
+  if(stateId){
+    let s = "";
+    if(info.blackjack) s = "2-card 21";
+    else if(info.bust) s = "bust";
+    else if(info.soft) s = "soft hand";
+    document.getElementById(stateId).textContent = s;
+  }
+}
+
+function renderHistory(){
+  const root = document.getElementById("history");
+  if(!history.length){
+    root.innerHTML = '<span class="empty">No cards entered yet.</span>';
+    return;
+  }
+
+  const zoneLabel = {shoe:"S",player:"P",dealer:"D"};
+  root.innerHTML = history.map(e=>{
+    const cls = e.zone === "player" ? "player" : e.zone === "dealer" ? "dealer" : "";
+    return `<span class="chip ${cls}">${e.rank}<small style="opacity:.55;margin-left:4px">${zoneLabel[e.zone]}</small></span>`;
+  }).join("");
+  root.scrollTop = root.scrollHeight;
+}
+
+function renderProbabilityTable(){
+  const root = document.getElementById("probTable");
+  root.innerHTML = "";
+  const total = totalRemaining();
+
+  for(const rank of Object.keys(START)){
+    const count = remaining[rank];
+    const p = total ? count/total : 0;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><b>${rank}</b><div class="bar"><div class="fill" style="width:${Math.min(100,p*100*8)}%"></div></div></td>
+      <td>${count}</td>
+      <td>${(p*100).toFixed(2)}%</td>`;
+    root.appendChild(tr);
+  }
+
+  const tenCount = remaining["10"]+remaining["J"]+remaining["Q"]+remaining["K"];
+  const tenP = total ? tenCount/total : 0;
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><b>Any 10-value</b></td><td><b>${tenCount}</b></td><td><b>${(tenP*100).toFixed(2)}%</b></td>`;
+  root.appendChild(tr);
+}
+
+function renderOutcomes(){
+  const o = nextCardOutcomeProbabilities();
+
+  document.getElementById("bustPct").textContent = o ? fmtPct(o.bust) : "—";
+  document.getElementById("make21Pct").textContent = o ? fmtPct(o.make21) : "—";
+  document.getElementById("make1720Pct").textContent = o ? fmtPct(o.make1720) : "—";
+  document.getElementById("under17Pct").textContent = o ? fmtPct(o.under17) : "—";
+  document.getElementById("p17").textContent = o ? fmtPct(o[17]) : "—";
+  document.getElementById("p18").textContent = o ? fmtPct(o[18]) : "—";
+  document.getElementById("p19").textContent = o ? fmtPct(o[19]) : "—";
+  document.getElementById("p20").textContent = o ? fmtPct(o[20]) : "—";
+  document.getElementById("blackjackPct").textContent = fmtPct(openingBlackjackProbability());
+}
+
+function render(){
+  renderButtons();
+  renderStats();
+  renderHand(playerHand,"playerCards","playerTotal","playerState","player");
+  renderHand(dealerHand,"dealerCards","dealerTotal",null,"dealer");
+  renderHistory();
+  renderProbabilityTable();
+  renderOutcomes();
+  document.getElementById("cutNotice").style.display = cutReached ? "block" : "none";
+  document.querySelectorAll(".mode").forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode === mode);
+  });
+}
+
+function save(){
+  try{
+    localStorage.setItem("bjTrackerV2", JSON.stringify({
+      remaining,history,playerHand,dealerHand,mode,cutReached
+    }));
+  }catch(e){}
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem("bjTrackerV2");
+    if(!raw) return;
+    const s = JSON.parse(raw);
+
+    if(s.remaining && Object.keys(START).every(k => Number.isInteger(s.remaining[k]) && s.remaining[k]>=0 && s.remaining[k]<=START[k])){
+      remaining = s.remaining;
+    }
+    if(Array.isArray(s.history)) history = s.history;
+    if(Array.isArray(s.playerHand)) playerHand = s.playerHand;
+    if(Array.isArray(s.dealerHand)) dealerHand = s.dealerHand;
+    if(["shoe","player","dealer"].includes(s.mode)) mode = s.mode;
+    cutReached = !!s.cutReached;
+  }catch(e){}
+}
+
+document.querySelectorAll(".mode").forEach(btn=>{
+  btn.onclick = ()=>setMode(btn.dataset.mode);
+});
+document.getElementById("undoBtn").onclick = undo;
+document.getElementById("clearRoundBtn").onclick = clearRound;
+document.getElementById("cutBtn").onclick = markCut;
+document.getElementById("newShoeBtn").onclick = ()=>{
+  if(history.length && !confirm("Reset everything to a completely fresh 8-deck shoe?")) return;
+  newShoe();
+};
+
+load();
+render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

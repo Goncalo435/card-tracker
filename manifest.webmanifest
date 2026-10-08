@@ -1,25 +1,22 @@
 {
-  "name": "Blackjack Table Trainer V3",
-  "short_name": "Table Trainer",
-  "description": "Eight-deck blackjack shoe tracking and probability practice.",
-  "start_url": "./",
+  "name": "Blackjack Probability Tracker V3.2",
+  "short_name": "BJ Tracker",
+  "description": "8-deck blackjack shoe probability and Hi-Lo true count tracker.",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#09120f",
-  "theme_color": "#0b1714",
+  "background_color": "#06100b",
+  "theme_color": "#06100b",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "./icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }

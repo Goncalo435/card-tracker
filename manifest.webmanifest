@@ -1,22 +1,15 @@
 {
-  "name": "Blackjack Probability Tracker V3.3",
-  "short_name": "BJ Tracker",
-  "description": "8-deck blackjack tracker with automatic game-flow card entry.",
-  "start_url": "./index.html",
+  "name": "Blackjack Table Trainer V3.6",
+  "short_name": "Table Trainer",
+  "description": "An offline-ready eight-deck blackjack tracker with Hi-Lo index suggestions.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#06100b",
-  "theme_color": "#06100b",
+  "orientation": "portrait",
+  "background_color": "#07140e",
+  "theme_color": "#07140e",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

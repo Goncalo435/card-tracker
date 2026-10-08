@@ -1,1 +1,20 @@
-const CACHE="bj-tracker-v3-3-cache-1";const ASSETS=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;e.respondWith(caches.match(e.request).then(h=>h||fetch(e.request).then(r=>{let c=r.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match("./index.html"))))});
+"use strict";
+var CACHE_NAME = "blackjack-table-trainer-v3-6";
+var APP_FILES = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+self.addEventListener("install", function (event) {
+  event.waitUntil(caches.open(CACHE_NAME).then(function (cache) { return cache.addAll(APP_FILES); }).then(function () { return self.skipWaiting(); }));
+});
+self.addEventListener("activate", function (event) {
+  event.waitUntil(caches.keys().then(function (keys) { return Promise.all(keys.filter(function (key) { return key !== CACHE_NAME; }).map(function (key) { return caches.delete(key); })); }).then(function () { return self.clients.claim(); }));
+});
+self.addEventListener("fetch", function (event) {
+  if (event.request.method !== "GET") return;
+  event.respondWith(caches.match(event.request).then(function (cached) {
+    if (cached) return cached;
+    return fetch(event.request).then(function (response) {
+      var copy = response.clone();
+      if (new URL(event.request.url).origin === self.location.origin) caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
+      return response;
+    });
+  }));
+});

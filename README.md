@@ -1,15 +1,21 @@
-# Blackjack Table Trainer V3.6
+# Blackjack Table Trainer V3.6.1
 
 An iPhone-friendly, installable eight-deck blackjack PWA for probability and strategy practice. It is static and can be published from the root of a GitHub Pages repository.
 
 ## Publish to GitHub Pages
 
-1. Unzip this bundle and upload the files in `blackjack-probability-tracker-v3-6` to the root of a GitHub repository.
+1. Unzip this bundle and upload its files to the root of a GitHub repository, replacing the previous app files.
 2. In GitHub, open **Settings → Pages** and choose **Deploy from a branch**, the `main` branch, and `/(root)`.
 3. Open the published HTTPS address in Safari on your iPhone.
 4. Tap **Share → Add to Home Screen**.
 
 The app caches its files for offline use after the first successful load. Shoe cards, settings, and session summaries are stored in local browser storage on that device.
+
+## V3.6.1 fixes
+
+- Fixed the dealer-card argument that prevented the action suggestion from recommending a play. DOUBLE and SPLIT hit/stand fallbacks now receive the correct card too.
+- Moved Stand, Finish dealer turn, and Next round into the fixed card selector.
+- Updated the offline cache version. After publishing, open the app online, then close and reopen it to load the update. The header should show V3.6.1. Existing V3.6 shoe data and settings are retained at the same website address.
 
 ## Round flow
 

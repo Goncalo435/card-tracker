@@ -12,14 +12,14 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="stylesheet" href="./styles.css">
-  <title>Blackjack Table Trainer · V3.6</title>
+  <title>Blackjack Table Trainer · V3.6.1</title>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="./" aria-label="Blackjack Table Trainer home">
         <img src="./icon.svg" alt="" width="42" height="42">
-        <span><strong>TABLE TRAINER</strong><small>BLACKJACK · 8 DECKS · V3.6</small></span>
+        <span><strong>TABLE TRAINER</strong><small>BLACKJACK · 8 DECKS · V3.6.1</small></span>
       </a>
       <div class="top-actions">
         <span id="connectionStatus" class="connection"><i></i><span>Online</span></span>
@@ -59,8 +59,6 @@
                 <article class="hand-card dealer-card"><div class="hand-heading"><span class="eyebrow">DEALER</span><b id="dealerTotal" class="hand-total">—</b></div><div id="dealerCards" class="hand-cards"><span class="empty-card">Dealer cards appear here</span></div></article>
               </div>
               <div class="round-controls">
-                <button id="flowButton" class="primary-button" type="button" hidden>Stand · Dealer</button>
-                <button id="nextRoundButton" class="primary-button" type="button" hidden>Next round</button>
                 <button id="undoButton" class="secondary-button" type="button">↶ Undo last change</button>
               </div>
               <div class="recent-block"><div class="recent-heading"><span class="eyebrow">RECENT CARDS</span><span>Tap a card to edit</span></div><div id="recentCards" class="recent-cards"></div></div>
@@ -138,6 +136,10 @@
   </div>
 
   <section id="entryDock" class="entry-dock" aria-label="Quick card entry">
+    <div class="dock-round-controls" aria-label="Round actions">
+      <button id="flowButton" class="primary-button" type="button" hidden>Stand · Dealer</button>
+      <button id="nextRoundButton" class="primary-button" type="button" hidden>Next round</button>
+    </div>
     <div class="entry-topline"><div><p class="eyebrow">ADD A CARD</p><strong id="entryPrompt">Enter your first card</strong></div><div class="entry-options"><button id="unknownButton" class="dock-text-button" type="button">Unknown</button><button id="suitToggle" class="dock-text-button" type="button" aria-pressed="false">Suits off</button></div></div>
     <div id="suitPicker" class="suit-picker" hidden aria-label="Choose suit"><button type="button" data-suit="spades" aria-pressed="false">♠</button><button type="button" data-suit="hearts" aria-pressed="false">♥</button><button type="button" data-suit="diamonds" aria-pressed="false">♦</button><button type="button" data-suit="clubs" aria-pressed="false">♣</button></div>
     <div id="rankPad" class="rank-pad" aria-label="Choose card rank"></div>

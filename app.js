@@ -626,15 +626,15 @@
     if (state.phase !== "player") return { ready: false, message: state.phase === "roundComplete" ? "Round complete. Start the next round when ready." : "Finish the opening deal to get a suggestion." };
     if (!cards.length || !up) return { ready: false, message: "Enter your two cards and the dealer up card." };
     if (!allKnown(cards) || !allKnown([up])) return { ready: false, message: "Resolve the Unknown card in your hand or the dealer up card to get a suggestion." };
-    var base = basicAction(cards, up.rank, false);
+    var base = basicAction(cards, up, false);
     if (!base) return { ready: false, message: "Complete the hand entry to get a suggestion." };
     var deviation = deviationFor(cards, up, base);
     return { ready: true, base: base, action: deviation ? deviation.action : base, deviation: deviation, cards: cards, up: up, uncertain: countIsUncertain(), tc: trueCount() };
   }
 
   function fallbackAction(cards, up, action) {
-    if (action === "DOUBLE") return basicAction(cards, up.rank, true, false) || "HIT";
-    if (action === "SPLIT") return basicAction(cards, up.rank, true, false) === "STAND" ? "STAND" : "HIT";
+    if (action === "DOUBLE") return basicAction(cards, up, true, false) || "HIT";
+    if (action === "SPLIT") return basicAction(cards, up, true, false) === "STAND" ? "STAND" : "HIT";
     return "";
   }
 

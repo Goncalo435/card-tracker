@@ -4,3 +4,9 @@
 @media(max-width:760px){.app-shell{padding-left:11px;padding-right:11px}.hero-row{grid-template-columns:1fr;gap:11px;margin-top:3px}.hero-copy h1{font-size:30px}.hero-copy>.muted{margin-top:7px}.page-grid{grid-template-columns:1fr;gap:0}.odds-column{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.recommendation-panel,.controls-panel{grid-column:1/-1}.tabs{margin-bottom:14px}.panel{padding:13px}.shoe-summary{padding:12px 13px}.outcome-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:440px){.app-shell{padding-left:9px;padding-right:9px}.panel{border-radius:14px;padding:11px}.hero-copy h1{font-size:27px}.summary-foot{font-size:8px}.status-chip{padding:4px 6px;font-size:8px}.hands-grid{gap:6px}.hand-card{padding:9px;min-height:94px}.playing-card{width:29px;height:39px}.count-stat{padding:8px 6px}.count-stat b{font-size:18px}.probability-grid{grid-template-columns:repeat(4,1fr)}.odds-column{gap:0 6px}.odds-panel{padding:10px}.rank-odds{gap:3px}.rank-odds .prob-chip{padding:5px 1px}.rank-odds .prob-chip span{font-size:7px}.rank-odds .prob-chip b{font-size:8px}.rank-button{height:39px;border-radius:8px;font-size:13px}.rank-pad{gap:4px}.entry-dock{padding-left:8px;padding-right:8px}.entry-topline{margin-bottom:6px}.dock-foot{font-size:7px}.app-footer{font-size:7px}}
 @media(max-width:350px){.odds-column{grid-template-columns:1fr}.recommendation-panel,.controls-panel{grid-column:auto}.rank-button{height:36px;font-size:12px}.entry-options{gap:3px}.dock-text-button{padding:5px 7px}}
+/* Keep round actions reachable beside card entry, including the iPhone safe area. */
+.dock-round-controls{max-width:900px;margin:0 auto;display:flex;gap:6px}
+.dock-round-controls .primary-button{flex:1;min-height:38px;margin-bottom:7px}
+.dock-round-controls [hidden]{display:none}
+.app-shell{padding-bottom:calc(280px + env(safe-area-inset-bottom))}
+.toast{bottom:calc(265px + env(safe-area-inset-bottom))}

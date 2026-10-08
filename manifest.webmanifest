@@ -1,7 +1,7 @@
 {
-  "name": "Blackjack Probability Tracker V3.2",
+  "name": "Blackjack Probability Tracker V3.3",
   "short_name": "BJ Tracker",
-  "description": "8-deck blackjack shoe probability and Hi-Lo true count tracker.",
+  "description": "8-deck blackjack tracker with automatic game-flow card entry.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

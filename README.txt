@@ -1,13 +1,21 @@
-BLACKJACK TRACKER V3.2
+BLACKJACK TRACKER V3.3 — SIMPLIFIED GAME FLOW
 
-New:
-- Larger/clearer "Undo last card" button.
-- "Unknown card" button for a card whose rank you missed.
-- Unknown cards are counted as physically dealt but are NOT assigned a fake Hi-Lo value.
-- Running count and true count display * while a missed card remains unresolved.
-- Unknown-card counter.
-- Tap an UNKNOWN entry in Recent Cards to resolve it later if you learn the rank.
-- Undo also removes the most recent Unknown entry.
-- Dealer hidden cards remain separate from missed/unknown cards.
+Changes:
+- Removed Seat 1 / Seat 2 / Seat 4 / Seat 5.
+- Only Your Hand and Dealer remain.
+- Card destination is automatic; you no longer select a seat.
+- Guided flow:
+  1. Your first card
+  2. Dealer up card
+  3. Your second card
+  4. Dealer hole card is automatically recorded as hidden
+  5. Enter your hit cards
+  6. Tap Stand -> Dealer
+  7. Enter dealer hole card when revealed
+  8. Enter dealer draw cards
+  9. Tap Next round
+- Undo last card remains.
+- Unknown card follows the current game-flow destination.
+- True count, shoe composition, probabilities, sessions and cut-card tools remain.
 
-To update GitHub Pages, replace the existing root files with the files in this folder and commit.
+To update GitHub Pages, replace the root files in your current repo with these files and commit.
